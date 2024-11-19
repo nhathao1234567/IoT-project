@@ -1,7 +1,7 @@
 const mqtt = require('mqtt');
 
-// Kết nối tới MQTT broker tại địa chỉ 192.168.91.103
-const client = mqtt.connect('mqtt://192.168.91.103'); 
+// Kết nối tới MQTT broker tại địa chỉ 
+const client = mqtt.connect('mqtt://192.xx.xx.xx'); 
 
 // Lắng nghe khi kết nối thành công với broker
 client.on('connect', () => {
