@@ -1,0 +1,19 @@
+{
+  "name": "apimongodb",
+  "version": "1.0.0",
+  "description": "demo ve api mongodb",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "pmk",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.7.7",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "moment": "^2.29.4",
+    "mongoose": "^7.0.3",
+    "mqtt": "^5.10.1"
+  }
+}

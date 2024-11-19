@@ -1,0 +1,314 @@
+<%- include('./partials/header.ejs') %>
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>Biểu Đồ Flot cảm biến</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="#">Trang chủ</a></li>
+              <li class="breadcrumb-item active">Số liệu cảm biến</li>
+              <li class="breadcrumb-item active">Biểu đồ uPlot</li>
+            </ol>
+          </div>
+        </div>
+        <!-- Add filter inputs here -->
+        <div class="row mb-2">
+          <div class="col-sm-2">
+            <h4><center>Chọn năm</center> </h4>
+            <select id="filterYear" class="form-control">
+              <option value="">Chọn năm</option>
+              <option value="2020">2020</option>
+              <option value="2021">2021</option>
+              <option value="2022">2022</option>
+              <option value="2023">2023</option>
+              <option value="2024">2024</option>
+              <option value="2025">2025</option>
+              <option value="2026">2026</option>
+              <option value="2027">2027</option>
+              <option value="2028">2028</option>
+              <option value="2029">2029</option>
+              <option value="2030">2030</option>
+              <option value="2031">2031</option>
+            </select>
+          </div>
+          <div class="col-sm-2">
+            <h4><center> Chọn Tháng</center> </h4>
+            <select id="filterMonth" class="form-control">
+              <option value="">Chọn tháng</option>
+              <option value="01">Tháng 1</option>
+              <option value="02">Tháng 2</option>
+              <option value="03">Tháng 3</option>
+              <option value="04">Tháng 4</option>
+              <option value="05">Tháng 5</option>
+              <option value="06">Tháng 6</option>
+              <option value="07">Tháng 7</option>
+              <option value="08">Tháng 8</option>
+              <option value="09">Tháng 9</option>
+              <option value="10">Tháng 10</option>
+              <option value="11">Tháng 11</option>
+              <option value="12">Tháng 12</option>
+            </select>
+          </div>
+          <div class="col-sm-2">
+            <h4><center> Chọn ngày</center> </h4>
+            <select id="filterDay" class="form-control">
+              <option value="">Chọn ngày</option>
+            </select>
+          </div>
+
+            <!-- sdafd -->
+          <div class="col-sm-2">
+            <h4><center>Giờ Bắt Đầu</center></h4>
+            <select id="fromHour" class="form-control">
+              <!-- Giờ bắt đầu sẽ được điền ở đây -->
+            </select>
+          </div>
+          <div class="col-sm-2">
+            <h4><center>Giờ Kết Thúc</center></h4>
+            <select id="toHour" class="form-control">
+              <!-- Giờ kết thúc sẽ được điền ở đây -->
+            </select>
+          </div>
+          
+
+
+
+
+          <div class="col-sm-2">
+            <button id="applyFilters" class="btn btn-primary">Lọc</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="content">
+      <div class="container-fluid">
+        <canvas id="myChart"></canvas>
+      </div>
+    </section>
+
+
+    <!-- //// -->
+
+
+
+
+    </div>
+
+    <%- include('./partials/scripts.ejs') %>
+
+      <script>
+        $(document).ready(function () {
+            // Hàm điền ngày cho tháng và năm đã chọn
+            function populateDays(year, month) {
+              $('#filterDay').empty();
+              var daysInMonth = new Date(year, month, 0).getDate(); // Lấy số ngày trong tháng
+          
+              // Thêm các ngày vào dropdown
+              for (var day = 1; day <= daysInMonth; day++) {
+                $('#filterDay').append($('<option>', {
+                  value: day,
+                  text: day
+                }));
+              }
+          
+              // Đảm bảo thêm ngày 31 nếu tháng có 31 ngày
+              if (daysInMonth < 31) {
+                $('#filterDay').append($('<option>', {
+                  value: 31,
+                  text: 31
+                }));
+              }
+            }
+          
+            // Hàm điền giờ cho dropdown
+            function populateHours() {
+              $('#fromHour').empty();
+              $('#toHour').empty();
+          
+              for (let hour = 0; hour < 24; hour++) { // 24 giờ (0-23)
+                $('#fromHour').append($('<option>', {
+                  value: hour,
+                  text: hour < 10 ? '0' + hour : hour
+                }));
+                $('#toHour').append($('<option>', {
+                  value: hour,
+                  text: hour < 10 ? '0' + hour : hour
+                }));
+              }
+            }
+          
+            // Lắng nghe sự kiện thay đổi năm hoặc tháng để cập nhật danh sách ngày
+            $('#filterMonth, #filterYear').change(function () {
+              const selectedMonth = $('#filterMonth').val();
+              const selectedYear = $('#filterYear').val();
+              populateDays(selectedYear, selectedMonth);
+              populateHours(); // Điền giờ khi thay đổi tháng/năm
+            });
+          
+            // Lọc dữ liệu khi nhấn nút "Lọc"
+            $('#applyFilters').click(function () {
+              const month = $('#filterMonth').val();
+              const year = $('#filterYear').val();
+              const day = $('#filterDay').val();
+              const fromHour = $('#fromHour').val();
+              const fromMinute = $('#fromMinute').val(); //
+              const toHour = $('#toHour').val();
+              const toMinute = $('#toMinute').val(); //
+
+          
+              const filters = {};
+              if (month) filters.month = month;
+              if (year) filters.year = year;
+              if (day) filters.day = day;
+              if (fromHour) filters.fromHour = fromHour;
+              if (fromMinute) filters.fromMinute = fromMinute; //
+              if (toHour) filters.toHour = toHour;
+              if (toMinute) filters.toMinute = toMinute; //
+          
+              getContent(filters); // Gửi bộ lọc dữ liệu
+            });
+          
+            // Hàm gửi yêu cầu và lọc dữ liệu theo bộ lọc đã chọn
+            function getContent(filters = {}) {
+                $.ajax({
+                  url: "http://127.0.0.1:8282/api/cambien",
+                  type: 'GET',
+                  data: filters,
+                  crossDomain: true,
+                  success: function (data) {
+                    console.log("Data received: ", data);
+                    
+                    // Lọc dữ liệu theo tháng, năm, ngày và giờ bắt đầu - giờ kết thúc
+                    const filteredData = data.filter(item => {
+                      // Tách ngày tháng năm từ chuỗi ngày nhận
+                      const date = item.ngaynhan.split('/');  // ngày/tháng/năm
+                      const itemMonth = parseInt(date[1], 10);
+                      const itemYear = parseInt(date[2], 10);
+                      const itemDay = parseInt(date[0], 10);
+              
+                      // Tách giờ và phút từ chuỗi thời gian nhận
+                      const time = item.gionhan.split(':');  // giờ:phút
+                      const itemHour = parseInt(time[0], 10);
+                      const itemMinute = parseInt(time[1], 10);
+              
+                      const selectedMonth = parseInt(filters.month, 10);
+                      const selectedYear = parseInt(filters.year, 10);
+                      const selectedDay = parseInt(filters.day, 10);
+              
+                      const selectedFromHour = parseInt(filters.fromHour, 10);
+                      const selectedFromMinute = parseInt(filters.fromMinute, 10);
+                      const selectedToHour = parseInt(filters.toHour, 10);
+                      const selectedToMinute = parseInt(filters.toMinute, 10);
+              
+                      // Kiểm tra ngày có phù hợp
+                      const isInDateRange = itemMonth === selectedMonth && 
+                                            itemYear === selectedYear && 
+                                            itemDay === selectedDay;
+              
+                      // Kiểm tra giờ có nằm trong khoảng giờ bắt đầu - giờ kết thúc
+                      const isInTimeRange = 
+                        (itemHour > selectedFromHour || (itemHour === selectedFromHour && itemMinute >= selectedFromMinute)) &&
+                        (itemHour < selectedToHour || (itemHour === selectedToHour && itemMinute <= selectedToMinute));
+              
+                      // Trả về true nếu ngày và giờ phù hợp
+                      return isInDateRange && isInTimeRange;
+                    });
+              
+                    drawChart(filteredData);  // Vẽ biểu đồ với dữ liệu đã lọc
+                  }
+                });
+              }
+          
+            // Hàm vẽ biểu đồ
+            function drawChart(data) {
+              var dataRet = tach_dl(data);
+              var ctx = document.getElementById('myChart').getContext('2d');
+          
+              if (window.myChart instanceof Chart) {
+                window.myChart.destroy(); // Xóa biểu đồ cũ nếu có
+              }
+          
+              window.myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                  labels: dataRet[0],
+                  datasets: [
+                    {
+                      label: 'Nhiệt độ',
+                      data: dataRet[1],
+                      borderColor: 'rgba(255, 99, 132, 1)',
+                      borderWidth: 1,
+                      fill: false
+                    },
+                    {
+                      label: 'Độ ẩm',
+                      data: dataRet[2],
+                      borderColor: 'rgba(54, 162, 235, 1)',
+                      borderWidth: 1,
+                      fill: false
+                    },
+                    {
+                      label: 'Độ pH',
+                      data: dataRet[3],
+                      borderColor: 'rgba(75, 192, 192, 1)',
+                      borderWidth: 1,
+                      fill: false
+                    }
+                  ]
+                },
+                options: {
+                  responsive: true,
+                  scales: {
+                    x: {
+                      display: true,
+                      title: {
+                        display: true,
+                        text: 'Thời gian'
+                      }
+                    },
+                    y: {
+                      display: true,
+                      title: {
+                        display: true,
+                        text: 'Giá trị'
+                      }
+                    }
+                  }
+                }
+              });
+            }
+          
+            // Hàm xử lý dữ liệu nhận được từ API
+            function tach_dl(datadb) {
+              var dataRet = [];
+              var itemgionhan = [];
+              var itemnhietdo = [];
+              var itemdoam = [];
+              var itemph = [];
+              datadb.forEach(el => {
+                itemgionhan.push(el.gionhan);
+                itemnhietdo.push(el.nhietdo);
+                itemdoam.push(el.doam);
+                itemph.push(el.ph);
+              });
+              dataRet.push(itemgionhan);
+              dataRet.push(itemnhietdo);
+              dataRet.push(itemdoam);
+              dataRet.push(itemph);
+              return dataRet;
+            }
+          
+            // Khởi tạo khi trang tải
+            populateDays($('#filterYear').val(), $('#filterMonth').val());
+            populateHours(); // Điền giờ vào các dropdown
+          });
+          
+      </script>
+      <%- include('./partials/footer.ejs') %>

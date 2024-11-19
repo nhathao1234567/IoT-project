@@ -1,0 +1,176 @@
+<%- include('./partials/header.ejs') %>
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>Thống kế cảm biến</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="#">Trang chủ</a></li>
+              <li class="breadcrumb-item active">Số liệu cảm biến</li>
+              
+              
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Bảng thống kê số liệu từ cảm biến</h3>
+              </div>
+              <div class="form-group">
+                
+                <button type="button" class="btn btn-info btn-flat" onclick="turnsensor()"
+                    id="turnsensor">Tắt cảm biến</button>
+            </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <table id="example2" class="table table-bordered table-hover">
+                  <thead class="text-center">
+                    <tr>
+                      <th>Ngày nhận</th>
+                      <th>Giờ nhận</th>
+                      <th>Nhiệt độ</th>
+                      <th>Độ ẩm</th>
+                      <th>Độ Ph</th>
+                      <th>Vị trí đặt TB</th>
+                      <th>Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody class="text-center" id="tb">
+
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <th>Ngày nhận</th>
+                      <th>Giờ nhận</th>
+                      <th>Nhiệt độ</th>
+                      <th>Độ ẩm</th>
+                      <th>Độ Ph</th>
+                      <th>Vị trí đặt TB</th>
+                      <th>Thao tác</th>
+                      
+                    </tr>
+                  </tfoot>
+                </table>
+
+              </div>
+              <div id="pagination" class="pagination">
+                <!-- Các nút phân trang sẽ được chèn vào đây -->
+              </div>
+              <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+            <!-- /.card -->
+          </div>
+          <!-- /.col -->
+        </div>
+        <!-- /.row -->
+      </div>
+      <!-- /.container-fluid -->
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+
+  <%- include('./partials/scripts.ejs') %>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+      $(document).ready(function () {
+
+        setInterval(function () {
+          getContent();
+        }, 5000);
+
+        function getContent() {
+          $.ajax({
+            url: "http://127.0.0.1:8282/api/cambien",
+            type: 'GET',
+            headers: {
+              //"accept": "application/json",
+              // "Access-Control-Allow-Origin":"*"
+            },
+            crossDomain: true,
+            success: function (data) {
+              render(data);
+              return false;
+            }
+          });
+        }
+
+        //Method render 
+        function render(res) {
+          var resData = "";
+          res.forEach(el => {
+            resData += "<tr><td>" + el.ngaynhan + "</td><td>" + el.gionhan + "</td>" +
+              "<td>" + el.nhietdo + "</td>" +
+              "<td>" + el.doam + "</td>" +
+              "<td>" + el.ph + "</td>" +
+              "<td>" + el.vitri + "</td>" +
+              "<td><button class='btn btn-danger btn-sm delete-btn' data-id='" + el.id + "'>Xóa</button></td>" +
+              "</tr>";
+          });
+
+          $("#tb").html(resData);
+        }
+
+
+
+        $(document).on('click', '.delete-btn', function () {
+          var id = $(this).data('id');
+
+          $.ajax({
+              url: "http://127.0.0.1:8282/api/cambien/" + id,
+              type: 'DELETE',
+              success: function (response) {
+                  alert("Dữ liệu đã được xóa thành công.");
+                  $(this).closest('tr').remove(); // Xóa hàng khỏi DOM
+              }.bind(this),
+              error: function (xhr, status, error) {
+                  console.error("Error deleting data:", error);
+                  alert("Đã xảy ra lỗi khi xóa dữ liệu.");
+              }
+          });
+      });
+
+
+  
+      });
+
+      var status = 0;
+      function turnsensor() {
+          if (status == 0) {
+              $.ajax({
+                  url: 'http://localhost:3000/stop',
+                  type: 'get'
+              }).done(function (result) {
+                  status = 1;
+                  $("#turnsensor").text("Mở cảm biến")
+              });
+          } else {
+              $.ajax({
+                  url: 'http://localhost:3000/start',
+                  type: 'get'
+              }).done(function (result) {
+                  status = 0;
+                  $("#turnsensor").text("Tắt cảm biến")
+              });
+          }
+
+      }
+
+    </script>
+
+    <%- include('./partials/footer.ejs') %>
