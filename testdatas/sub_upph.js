@@ -2,7 +2,7 @@ const mqtt = require('mqtt');
 const axios = require('axios');
 
 // Cấu hình MQTT Broker và API
-const raspberryBroker = 'mqtt://192.168.91.110'; // IP của Raspberry Pi
+const raspberryBroker = 'mqtt://192.xx.xx.xx'; // IP của Raspberry Pi
 const nhietdoTopic = 'esp1/nhietdo';
 const doamTopic = 'esp1/doam';
 const phTopic = 'esp1/pH';
