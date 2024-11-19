@@ -1,5 +1,5 @@
 const mqtt = require('mqtt'); 
-const laptopClient = mqtt.connect('mqtt://192.168.91.105'); // Địa chỉ IP của laptop
+const laptopClient = mqtt.connect('mqtt://192.xx.xx.xx'); // Địa chỉ IP của laptop
 
 laptopClient.on('connect', () => {
   console.log('Kết nối thành công với Laptop Broker');
